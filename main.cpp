@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <unordered_set>
+#include <ranges>
 
 #include "scara.h"
 
@@ -170,11 +171,10 @@ std::vector<tile> get_shortest_path(tile& start, tile& end, std::unordered_map<i
     while (!open_vector.empty())
     {
         // Get the lowest f cost in open vector
-        std::vector<tile>::iterator current_tile = std::min_element(open_vector.begin(), open_vector.end(), 
-            [](const tile& a, const tile& b) { return a.get_f_cost() < b.get_f_cost(); });
+        tile current_tile = *get_lowest_f_cost(open_vector);
 
         // If current is equals to the end tile; return path
-        if (*current_tile == end)
+        if (current_tile == end)
         {
             std::vector<tile> path;
             tile* current_path_tile = &end;
@@ -190,18 +190,18 @@ std::vector<tile> get_shortest_path(tile& start, tile& end, std::unordered_map<i
         }
 
         // Move current tile from open to closed set
-        closed_set.insert(*current_tile);
-        open_vector.erase(current_tile);
+        closed_set.insert(current_tile);
+        open_vector.erase(std::ranges::find(open_vector, current_tile));
 
         // Get neighbours of current tile
-        for (tile& neighbour : get_neighbours(*current_tile, tiles))
+        for (tile& neighbour : get_neighbours(current_tile, tiles))
         {
             // Skip neighbour if it's not walkable or in closed set
             if (!is_walkable(neighbour) || closed_set.count(neighbour) > 0)
                 continue;
 
             // Calculate new cost to neighbour
-            int new_g_cost = current_tile->get_g_cost() + get_distance(current_tile->get_position(), neighbour.get_position());
+            int new_g_cost = current_tile.get_g_cost() + get_distance(current_tile.get_position(), neighbour.get_position());
 
             // If neighbour is not in open set or new g cost is less than current g cost, update neighbour's costs and connection
             auto it = std::find(open_vector.begin(), open_vector.end(), neighbour);
@@ -209,7 +209,7 @@ std::vector<tile> get_shortest_path(tile& start, tile& end, std::unordered_map<i
             {
                 neighbour.set_g_cost(new_g_cost);
                 neighbour.set_h_cost(get_distance(neighbour.get_position(), end.get_position()));
-                neighbour.set_connection(current_tile->get_position());
+                neighbour.set_connection(current_tile.get_position());
 
                 // Add neighbour to open set if not already present
                 if (it == open_vector.end())
