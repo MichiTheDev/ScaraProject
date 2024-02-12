@@ -26,9 +26,25 @@ struct int2
     int2() : x(0), y(0) {}
     int2(int x, int y) : x(x), y(y) {}
 
+    static int2 up() { return int2(0, -1); }
+    static int2 down() { return int2(0, 1); }
+    static int2 right() { return int2(1, 0); }
+    static int2 left() { return int2(-1, 0); }
+    static int mag(const int2& a) { return sqrt(a.x * a.x + a.y * a.y); }
+    
     int2 operator+(const int2& a) const
     {
         return { x + a.x, y + a.y };
+    }
+
+    int2 operator-(const int2& a) const
+    {
+        return { x - a.x, y - a.y };
+    }
+    
+    int2 operator/(const int a) const
+    {
+        return { x / a, y / a };
     }
     
     static size_t hash(const int2& key) {
@@ -71,9 +87,10 @@ public:
     [[nodiscard]] int get_mask() const { return mask_; }
 
     void set_connection(int2 connection) { connection_position_ = connection; }
+    void set_position(int2 position) { position_ = position; }
     void set_g_cost(const int g_cost) { g_cost_ = g_cost; }
     void set_h_cost(const int h_cost) { h_cost_ = h_cost; }
-
+    
     bool operator==(const tile& tile) const
     {
         return int2::equal(position_, tile.position_);
@@ -141,19 +158,19 @@ std::vector<tile*> get_neighbours(const tile& current_tile, std::unordered_map<i
     int2 current_position = current_tile.get_position();
 
     // NORTH NEIGHBOUR
-    int2 north_position = current_position + int2(0, -1);
+    int2 north_position = current_position + int2::up();
     if (tiles.contains(north_position)) { neighbours.push_back(&tiles[north_position]); }
     
     // EAST NEIGHBOUR
-    int2 east_position = current_position + int2(1, 0);
+    int2 east_position = current_position + int2::right();
     if (tiles.contains(east_position)) { neighbours.push_back(&tiles[east_position]); }
 
     // SOUTH NEIGHBOUR
-    int2 south_position = current_position + int2(0, 1);
+    int2 south_position = current_position + int2::down();
     if (tiles.contains(south_position)) { neighbours.push_back(&tiles[south_position]); }
 
     // WEST NEIGHBOUR
-    int2 west_position = current_position + int2(-1, 0);
+    int2 west_position = current_position + int2::left();
     if (tiles.contains(west_position)) { neighbours.push_back(&tiles[west_position]); }
 
     return neighbours;
@@ -243,18 +260,51 @@ std::vector<tile> get_shortest_path(tile& start, tile& end, std::unordered_map<i
     return {};
 }
 
+int2 get_direction_from_to(tile& a, tile& b)
+{
+    int2 direction = int2(b.get_position() - a.get_position());
+    return direction / int2::mag(direction);
+}
+
+void turn_towards_tile(int2& direction, const int2& path_direction)
+{
+    while(!int2::equal(direction, path_direction))
+    {
+        if(int2::equal(direction, int2::up())) { direction = int2::left(); }
+        else if(int2::equal(direction, int2::left())) { direction = int2::down(); }
+        else if(int2::equal(direction, int2::down())) { direction = int2::right(); }
+        else if(int2::equal(direction, int2::right())) { direction = int2::up(); }
+        turn_left();
+    }
+}
+
+void move_with_shortest_path(tile& scara, std::vector<tile> path, std::unordered_map<int2, tile, int2Hasher, int2Equal>& tiles)
+{
+    auto current_path_tile = path.begin();
+    int2 direction = get_scaras_direction(scara);
+    int2 path_direction = get_direction_from_to(scara, *current_path_tile);
+    turn_towards_tile(direction, path_direction);
+    while(current_path_tile != path.end())
+    {
+        path_direction = get_direction_from_to(scara, *current_path_tile);
+        turn_towards_tile(direction, path_direction);
+        scara.set_position(scara.get_position() + direction);
+        current_path_tile++;
+        move();
+    }
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 
 
 int main()
 {
-    start("AufKuerzestemWeg", 325);
+    start("AufKuerzestemWeg");
     
     std::unordered_map<int2, tile, int2Hasher, int2Equal> tiles;
     std::vector<tile> specific_tiles = get_level_tiles(tiles, {SCARA, ANKH});
     std::vector<tile> path = get_shortest_path(tiles[specific_tiles[0].get_position()], tiles[specific_tiles[1].get_position()], tiles);
-    int2 direction = get_scaras_direction(specific_tiles[0]);
+    move_with_shortest_path(tiles[specific_tiles[0].get_position()], path, tiles);
     
     end();
 }
