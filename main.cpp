@@ -11,6 +11,8 @@ constexpr int SCARA = 0;
 constexpr int DEFAULT_TILE = 1;
 constexpr int ANKH = 2;
 
+constexpr int DIRECTION = 13;
+
 constexpr int RIGHT_LEVEL_BORDER = 21;
 constexpr int BOTTOM_LEVEL_BORDER = 22;
 
@@ -167,6 +169,21 @@ int get_distance(const int2& a, const int2& b)
     return std::abs(a.x - b.x) + std::abs(a.y - b.y);
 }
 
+int2 get_scaras_direction(const tile& scara)
+{
+    int direction_mask = scara.get_mask() >> 13 & 0b11;
+
+    switch (direction_mask)
+    {
+        case 0b00: return int2(0, -1);
+        case 0b01: return int2(1, 0);
+        case 0b10: return int2(0, 1);
+        case 0b11: return int2(-1, 0);
+    }
+
+    return int2();
+}
+
 std::vector<tile> get_shortest_path(tile& start, tile& end, std::unordered_map<int2, tile, int2Hasher, int2Equal>& tiles)
 {
     std::vector open_vector { start };
@@ -181,15 +198,15 @@ std::vector<tile> get_shortest_path(tile& start, tile& end, std::unordered_map<i
         if (current_tile == end)
         {
             std::vector<tile> path;
-            tile* current_path_tile = &current_tile;
+            tile* current_path_tile = &end;
 
-            while (current_path_tile != &tiles[start.get_position()])
+            while (current_path_tile != &start)
             {
                 path.push_back(*current_path_tile);
                 current_path_tile = &tiles[current_path_tile->get_connection()];
             }
 
-            std::ranges::views::reverse(path);
+            std::reverse(path.begin(), path.end());
             return path;
         }
 
@@ -232,16 +249,12 @@ std::vector<tile> get_shortest_path(tile& start, tile& end, std::unordered_map<i
 
 int main()
 {
-    start("AufKuerzestemWeg");
+    start("AufKuerzestemWeg", 325);
     
     std::unordered_map<int2, tile, int2Hasher, int2Equal> tiles;
     std::vector<tile> specific_tiles = get_level_tiles(tiles, {SCARA, ANKH});
-    std::vector<tile> path = get_shortest_path(specific_tiles[0], specific_tiles[1], tiles);
-    
-    for (auto tile : path)
-    {
-        std::cout << "X[" << tile.get_position().x << "]|[" << tile.get_position().y << "]" << std::endl;
-    }
+    std::vector<tile> path = get_shortest_path(tiles[specific_tiles[0].get_position()], tiles[specific_tiles[1].get_position()], tiles);
+    int2 direction = get_scaras_direction(specific_tiles[0]);
     
     end();
 }
