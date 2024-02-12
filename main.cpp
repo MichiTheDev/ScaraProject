@@ -65,6 +65,7 @@ public:
     [[nodiscard]] int2 get_connection() { return connection_position_; }
     [[nodiscard]] int get_f_cost() const { return g_cost_ + h_cost_; }
     [[nodiscard]] int get_g_cost() const { return g_cost_; }
+    [[nodiscard]] int get_h_cost() const { return h_cost_; }
     [[nodiscard]] int get_mask() const { return mask_; }
 
     void set_connection(int2 connection) { connection_position_ = connection; }
@@ -120,42 +121,45 @@ std::vector<tile> get_level_tiles(std::unordered_map<int2, tile, int2Hasher, int
 
 tile* get_lowest_f_cost(std::vector<tile>& tiles)
 {
-    tile& lowest_f_cost_tile = tiles[0];
-    for (const tile& current_tile : tiles)
+    int lowest_f_cost_index = 0;
+    for (int i = 0; i < tiles.size(); ++i)
     {
-        if (current_tile.get_f_cost() < lowest_f_cost_tile.get_f_cost()) { lowest_f_cost_tile = current_tile; }
+        if (tiles[i].get_f_cost() < tiles[lowest_f_cost_index].get_f_cost()
+            || tiles[i].get_f_cost() == tiles[lowest_f_cost_index].get_f_cost()
+            && tiles[i].get_h_cost() < tiles[lowest_f_cost_index].get_h_cost())
+            { lowest_f_cost_index = i; }
     }
-    return &lowest_f_cost_tile;
+    return &tiles[lowest_f_cost_index];
 }
 
-std::vector<tile> get_neighbours(const tile& current_tile, std::unordered_map<int2, tile, int2Hasher, int2Equal>& tiles)
+std::vector<tile*> get_neighbours(const tile& current_tile, std::unordered_map<int2, tile, int2Hasher, int2Equal>& tiles)
 {
-    std::vector<tile> neighbours;
+    std::vector<tile*> neighbours;
 
     int2 current_position = current_tile.get_position();
 
     // NORTH NEIGHBOUR
-    int2 north_position = current_position + int2(0, 1);
-    if (tiles.contains(north_position)) { neighbours.push_back(tiles[north_position]); }
+    int2 north_position = current_position + int2(0, -1);
+    if (tiles.contains(north_position)) { neighbours.push_back(&tiles[north_position]); }
     
     // EAST NEIGHBOUR
     int2 east_position = current_position + int2(1, 0);
-    if (tiles.contains(east_position)) { neighbours.push_back(tiles[east_position]); }
+    if (tiles.contains(east_position)) { neighbours.push_back(&tiles[east_position]); }
 
     // SOUTH NEIGHBOUR
-    int2 south_position = current_position + int2(0, -1);
-    if (tiles.contains(south_position)) { neighbours.push_back(tiles[south_position]); }
+    int2 south_position = current_position + int2(0, 1);
+    if (tiles.contains(south_position)) { neighbours.push_back(&tiles[south_position]); }
 
     // WEST NEIGHBOUR
     int2 west_position = current_position + int2(-1, 0);
-    if (tiles.contains(west_position)) { neighbours.push_back(tiles[west_position]); }
+    if (tiles.contains(west_position)) { neighbours.push_back(&tiles[west_position]); }
 
     return neighbours;
 }
 
 bool is_walkable(const tile& tile)
 {
-    return is_tile(tile.get_mask(), DEFAULT_TILE);
+    return is_tile(tile.get_mask(), DEFAULT_TILE) || is_tile(tile.get_mask(), ANKH);
 }
 
 int get_distance(const int2& a, const int2& b)
@@ -172,20 +176,20 @@ std::vector<tile> get_shortest_path(tile& start, tile& end, std::unordered_map<i
     {
         // Get the lowest f cost in open vector
         tile current_tile = *get_lowest_f_cost(open_vector);
-
+        
         // If current is equals to the end tile; return path
         if (current_tile == end)
         {
             std::vector<tile> path;
-            tile* current_path_tile = &end;
+            tile* current_path_tile = &current_tile;
 
-            while (current_path_tile != &start)
+            while (current_path_tile != &tiles[start.get_position()])
             {
                 path.push_back(*current_path_tile);
                 current_path_tile = &tiles[current_path_tile->get_connection()];
             }
 
-            std::reverse(path.begin(), path.end());
+            std::ranges::views::reverse(path);
             return path;
         }
 
@@ -194,26 +198,26 @@ std::vector<tile> get_shortest_path(tile& start, tile& end, std::unordered_map<i
         open_vector.erase(std::ranges::find(open_vector, current_tile));
 
         // Get neighbours of current tile
-        for (tile& neighbour : get_neighbours(current_tile, tiles))
+        for (tile* neighbour : get_neighbours(current_tile, tiles))
         {
             // Skip neighbour if it's not walkable or in closed set
-            if (!is_walkable(neighbour) || closed_set.count(neighbour) > 0)
+            if (!is_walkable(*neighbour) || closed_set.count(*neighbour) > 0)
                 continue;
 
             // Calculate new cost to neighbour
-            int new_g_cost = current_tile.get_g_cost() + get_distance(current_tile.get_position(), neighbour.get_position());
+            int new_g_cost = current_tile.get_g_cost() + get_distance(current_tile.get_position(), neighbour->get_position());
 
             // If neighbour is not in open set or new g cost is less than current g cost, update neighbour's costs and connection
-            auto it = std::find(open_vector.begin(), open_vector.end(), neighbour);
-            if (it == open_vector.end() || new_g_cost < neighbour.get_g_cost())
+            auto it = std::ranges::find(open_vector, *neighbour);
+            if (it == open_vector.end() || new_g_cost < neighbour->get_g_cost())
             {
-                neighbour.set_g_cost(new_g_cost);
-                neighbour.set_h_cost(get_distance(neighbour.get_position(), end.get_position()));
-                neighbour.set_connection(current_tile.get_position());
+                neighbour->set_g_cost(new_g_cost);
+                neighbour->set_h_cost(get_distance(neighbour->get_position(), end.get_position()));
+                neighbour->set_connection(current_tile.get_position());
 
                 // Add neighbour to open set if not already present
                 if (it == open_vector.end())
-                    open_vector.push_back(neighbour);
+                    open_vector.push_back(*neighbour);
             }
         }
     }
@@ -233,7 +237,7 @@ int main()
     std::unordered_map<int2, tile, int2Hasher, int2Equal> tiles;
     std::vector<tile> specific_tiles = get_level_tiles(tiles, {SCARA, ANKH});
     std::vector<tile> path = get_shortest_path(specific_tiles[0], specific_tiles[1], tiles);
-
+    
     for (auto tile : path)
     {
         std::cout << "X[" << tile.get_position().x << "]|[" << tile.get_position().y << "]" << std::endl;
