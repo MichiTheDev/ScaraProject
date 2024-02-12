@@ -107,7 +107,7 @@ public:
 // FUNCTIONS
 //----------------------------------------------------------------------------------------------------------------------
 
-std::vector<tile> get_level_tiles(std::unordered_map<int2, tile, int2Hasher, int2Equal>& tiles, const std::vector<int>& specific_tile_masks = {})
+void get_level_tiles(std::unordered_map<int2, tile, int2Hasher, int2Equal>& tiles, int2& scara, int2& ankh)
 {
     std::vector<tile> specific_tiles;
 
@@ -119,23 +119,12 @@ std::vector<tile> get_level_tiles(std::unordered_map<int2, tile, int2Hasher, int
             tile_mask = scan_tile_at(x, y);
             int2 tile_position = int2(x, y);
             tiles[tile_position] = tile(tile_position, tile_mask);
-            
-            if(!specific_tile_masks.empty())
-            {
-                for (int mask : specific_tile_masks)
-                {
-                    if(is_tile(tile_mask, mask))
-                    {
-                        specific_tiles.push_back(tile(tile_position, tile_mask));
-                        break;
-                    }
-                }
-            }
+
+            if(is_tile(tile_mask, SCARA)) { scara = tile_position; }
+            if(is_tile(tile_mask, ANKH)) { ankh = tile_position; }
         }
         tile_mask = scan_tile_at(x, 0);
     }
-
-    return specific_tiles;
 }
 
 tile* get_lowest_f_cost(std::vector<tile>& tiles)
@@ -280,6 +269,8 @@ void turn_towards_tile(int2& direction, const int2& path_direction)
 
 void move_with_shortest_path(tile& scara, std::vector<tile> path, std::unordered_map<int2, tile, int2Hasher, int2Equal>& tiles)
 {
+    if(path.empty()) return;
+    
     auto current_path_tile = path.begin();
     int2 direction = get_scaras_direction(scara);
     int2 path_direction = get_direction_from_to(scara, *current_path_tile);
@@ -300,11 +291,15 @@ void move_with_shortest_path(tile& scara, std::vector<tile> path, std::unordered
 int main()
 {
     start("AufKuerzestemWeg");
+
+    set_speed(10);
+    show_roation(false);
     
     std::unordered_map<int2, tile, int2Hasher, int2Equal> tiles;
-    std::vector<tile> specific_tiles = get_level_tiles(tiles, {SCARA, ANKH});
-    std::vector<tile> path = get_shortest_path(tiles[specific_tiles[0].get_position()], tiles[specific_tiles[1].get_position()], tiles);
-    move_with_shortest_path(tiles[specific_tiles[0].get_position()], path, tiles);
+    int2 scara_position, ankh_position;
+    get_level_tiles(tiles, scara_position, ankh_position);
+    std::vector<tile> path = get_shortest_path(tiles[scara_position], tiles[ankh_position], tiles);
+    move_with_shortest_path(tiles[scara_position], path, tiles);
     
     end();
 }

@@ -67,3 +67,13 @@ export bool is_tile(const int mask_to_check, const int mask)
 {
     return mask_to_check & 1 << mask;
 }
+
+export void set_speed(int speed)
+{
+    Scara::setzeTempo(speed);
+}
+
+export void show_roation(bool value)
+{
+    Scara::zeigeDrehung(value);
+}
