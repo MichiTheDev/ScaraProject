@@ -1,4 +1,5 @@
 #include <iostream>
+#include <random>
 #include <unordered_map>
 #include <unordered_set>
 #include <ranges>
@@ -290,9 +291,12 @@ void move_with_shortest_path(tile& scara, std::vector<tile> path, std::unordered
 
 int main()
 {
-    start("AufKuerzestemWeg");
-
-    set_speed(10);
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<std::mt19937::result_type> dist(0,2000000000);
+    
+    start("AufKuerzestemWeg", dist(rng));
+    
     show_roation(false);
     
     std::unordered_map<int2, tile, int2Hasher, int2Equal> tiles;

@@ -5,14 +5,14 @@
         {
             "primary-output": "x64\\Release\\scara_functions.ixx.obj",
             "outputs": [
-                "C:\\Users\\Michael\\Documents\\C++ Projects\\ScaraProject\\x64\\Release\\vc143.pdb",
+                "C:\\Users\\Michael\\Documents\\Dev\\C++ Projects\\ScaraProject\\x64\\Release\\vc143.pdb",
                 "x64\\Release\\",
-                "C:\\Users\\Michael\\Documents\\C++ Projects\\ScaraProject\\x64\\Release\\scara_functions.ixx.ifc"
+                "C:\\Users\\Michael\\Documents\\Dev\\C++ Projects\\ScaraProject\\x64\\Release\\scara_functions.ixx.ifc"
             ],
             "provides": [
                 {
                     "logical-name": "scara_functions",
-                    "source-path": "c:\\users\\michael\\documents\\c++ projects\\scaraproject\\scara_functions.ixx",
+                    "source-path": "c:\\users\\michael\\documents\\dev\\c++ projects\\scaraproject\\scara_functions.ixx",
                     "is-interface": true
                 }
             ],
