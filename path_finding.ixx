@@ -5,9 +5,9 @@
 #include <unordered_map>
 #include <unordered_set>
 
-import scara_functions;
-
 export module path_finding;
+
+import scara_functions;
 
 constexpr int SCARA = 0;
 constexpr int DEFAULT_TILE = 1;
@@ -29,7 +29,7 @@ struct int2
     static int2 down() { return int2(0, 1); }
     static int2 right() { return int2(1, 0); }
     static int2 left() { return int2(-1, 0); }
-    static int mag(const int2& a) { return sqrt(a.x * a.x + a.y * a.y); }
+    static int mag(const int2& a) { return static_cast<int>(sqrt(a.x * a.x + a.y * a.y)); }
     
     int2 operator+(const int2& a) const
     {
@@ -75,7 +75,7 @@ class tile
     int g_cost_, h_cost_;
     
 public:
-    tile() : position_(int2()), connection_position_(int2()), mask_(0), g_cost_(0), h_cost_(0){}
+    tile() : position_({}), connection_position_({}), mask_(0), g_cost_(0), h_cost_(0){}
     tile(const int2 position, const int mask) : position_(position), connection_position_(int2()), mask_(mask), g_cost_(0), h_cost_(0) {}
 
     [[nodiscard]] int2 get_position() const { return position_; }
@@ -109,6 +109,7 @@ void get_level_tiles(std::unordered_map<int2, tile, int2Hasher, int2Equal>& tile
     int tile_mask = 0;
     for (int x = 0; !is_tile(tile_mask, RIGHT_LEVEL_BORDER); ++x)
     {
+        tile_mask = 0;
         for (int y = 0; !is_tile(tile_mask, BOTTOM_LEVEL_BORDER); ++y)
         {
             tile_mask = scan_tile_at(x, y);
@@ -118,7 +119,6 @@ void get_level_tiles(std::unordered_map<int2, tile, int2Hasher, int2Equal>& tile
             if(is_tile(tile_mask, SCARA)) { scara = tile_position; }
             if(is_tile(tile_mask, ANKH)) { ankh = tile_position; }
         }
-        tile_mask = scan_tile_at(x, 0);
     }
 }
 
@@ -167,7 +167,7 @@ bool is_walkable(const tile& tile)
 
 int get_distance(const int2& a, const int2& b)
 {
-    return std::abs(a.x - b.x) + std::abs(a.y - b.y);
+    return abs(a.x - b.x) + abs(a.y - b.y);
 }
 
 int2 get_scaras_direction(const tile& scara)
@@ -264,13 +264,15 @@ void turn_towards_tile(int2& direction, const int2& path_direction)
 
 export void move_with_shortest_path()
 {
+    // Get required information
     std::unordered_map<int2, tile, int2Hasher, int2Equal> tiles;
     int2 scara_position, ankh_position;
     get_level_tiles(tiles, scara_position, ankh_position);
     std::vector<tile> path = get_shortest_path(tiles[scara_position], tiles[ankh_position], tiles);
     
     if(path.empty()) return;
-    
+
+    // Turn scara to initial position
     int2 direction = get_scaras_direction(tiles[scara_position]);
     int2 path_direction = get_direction_from_to(tiles[scara_position], *path.begin());
     turn_towards_tile(direction, path_direction);
