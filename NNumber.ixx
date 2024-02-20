@@ -6,19 +6,16 @@ export module NNumber;
 
 export class NNumber
 {
-    mutable int _number;
-    mutable bool _prim;
-    mutable bool _prim_checked;
-    mutable bool _perfect;
-    mutable bool _perfect_checked;
+    using val_t = long;
+    val_t number_;
     
 public:
     
-    NNumber() : _number(0) {}
-    explicit NNumber(const int number)
+    NNumber() {}
+    explicit NNumber(const val_t number)
     {
-        if(number >= 0) _number = number;
-        else _number = -number;
+        if(number >= 0) number_ = number;
+        else number_ = -number;
     }
 
     // LOGIC FUNCTIONS
@@ -26,67 +23,62 @@ public:
     
     void print() const
     {
-        std::cout << _number << std::endl; 
+        std::cout << number_ << std::endl; 
     }
     
     bool is_prim() const
     {
-        if(!_prim_checked)
-        {
-            _prim_checked = true;
-            _prim = is_prim(_number);
-        }
+        if (number_ <= 1)
+            return false;
         
-        return _prim;
+        for (int i = 2; i <= number_ / 2; ++i)
+            if (number_ % i == 0)
+                return false;
+ 
+        return true;  
     }
 
     bool is_perfect() const
     {
-        if(!_perfect_checked)
-        {
-            _perfect_checked = true;
-            _perfect = get_divisor_sum(_number) == _number;
-        }
-        
-        return _perfect;
+        if(number_ == 0) return false;
+
+        return get_divisor_sum(number_) == number_;
     }
 
-    // GETTER + SETTER
-    //------------------------------------------------------------------------------------------------------------------
-    
-    int get_value() const
+    void next()
     {
-        return _number;
-    }
-
-    void set_value(const int number) const
-    {
-        if(number >= 0) _number = number;
-        else _number = -number;
+        set_value(number_ + 1);
     }
     
-    static bool is_prim(const int number)
+    NNumber get_next() const
     {
-        if (number <= 1)
-            return false;
-        
-        for (int i = 2; i <= number / 2; ++i)
-            if (number % i == 0)
-                return false;
- 
-        return true;    
+        return NNumber(number_ + 1);    
     }
 
-    static int get_divisor_sum(const int number, const bool with_own_value = false)
+    static val_t get_divisor_sum(const int number, const bool with_own_value = false)
     {
         if(number == 0) return 0;
         
-        int divisor_sum = 1;
-        int condition_value = with_own_value ? number : number / 2;
+        val_t divisor_sum = 1;
+        const val_t condition_value = with_own_value ? number : number / 2;
         
         for (int i = 2; i <= condition_value; ++i)
             divisor_sum += number % i == 0 ? i : 0;
         
         return divisor_sum;
+    }
+    
+    // GETTER + SETTER
+    //------------------------------------------------------------------------------------------------------------------
+    
+    val_t get_value() const
+    {
+        return number_;
+    }
+
+    void set_value(const val_t number)
+    {
+        if(number >= 0) number_ = number;
+        else number_ = -number;
     }
 };

@@ -5,14 +5,14 @@
         {
             "primary-output": "x64\\Release\\NNumber.ixx.obj",
             "outputs": [
-                "C:\\Users\\Michael\\Documents\\Dev\\C++ Projects\\ScaraProject\\x64\\Release\\vc143.pdb",
+                "C:\\Users\\Michael.Lambertz\\Documents\\GitHub\\ScaraProject\\x64\\Release\\vc143.pdb",
                 "x64\\Release\\",
-                "C:\\Users\\Michael\\Documents\\Dev\\C++ Projects\\ScaraProject\\x64\\Release\\NNumber.ixx.ifc"
+                "C:\\Users\\Michael.Lambertz\\Documents\\GitHub\\ScaraProject\\x64\\Release\\NNumber.ixx.ifc"
             ],
             "provides": [
                 {
                     "logical-name": "NNumber",
-                    "source-path": "c:\\users\\michael\\documents\\dev\\c++ projects\\scaraproject\\nnumber.ixx",
+                    "source-path": "c:\\users\\michael.lambertz\\documents\\github\\scaraproject\\nnumber.ixx",
                     "is-interface": true
                 }
             ],

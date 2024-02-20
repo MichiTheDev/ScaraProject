@@ -130,6 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cup.ixx" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NNumber.ixx" />
     <ClCompile Include="path_finding.ixx" />

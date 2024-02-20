@@ -40,7 +40,7 @@ export void turn_right()
     Scara::dreheLinks();
 }
 
-export bool check_for_ankh()
+export bool stand_on_ankh()
 {
     return Scara::stehtAufAnkh();
 }
@@ -73,7 +73,46 @@ export void set_speed(int speed)
     Scara::setzeTempo(speed);
 }
 
-export void show_roation(bool value)
+export void show_rotation(bool value)
 {
     Scara::zeigeDrehung(value);
+}
+
+export bool abyss_in_front()
+{
+    return Scara::istVorneAbgrund();
+}
+
+export void set_terminal_value(const int& value)
+{
+    Scara::setzeTerminalwert(value);
+}
+
+export int get_terminal_value()
+{
+    return Scara::holeTerminalwert();
+}
+
+export int get_terminal_id()
+{
+    return Scara::holeTerminalnummer();
+}
+
+export bool stand_on_terminal()
+{
+    return Scara::stehtAufTerminal();
+}
+
+export bool move_until_terminal(int& steps)
+{
+    while(!abyss_in_front())
+    {
+        move();
+        steps++;
+        if(stand_on_terminal())
+        {
+            return true;
+        }
+    }
+    return false;
 }

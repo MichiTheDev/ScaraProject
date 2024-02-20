@@ -5,14 +5,14 @@
         {
             "primary-output": "x64\\Release\\path_finding.ixx.obj",
             "outputs": [
-                "C:\\Users\\Michael\\Documents\\Dev\\C++ Projects\\ScaraProject\\x64\\Release\\vc143.pdb",
+                "C:\\Users\\Michael.Lambertz\\Documents\\GitHub\\ScaraProject\\x64\\Release\\vc143.pdb",
                 "x64\\Release\\",
-                "C:\\Users\\Michael\\Documents\\Dev\\C++ Projects\\ScaraProject\\x64\\Release\\path_finding.ixx.ifc"
+                "C:\\Users\\Michael.Lambertz\\Documents\\GitHub\\ScaraProject\\x64\\Release\\path_finding.ixx.ifc"
             ],
             "provides": [
                 {
                     "logical-name": "path_finding",
-                    "source-path": "c:\\users\\michael\\documents\\dev\\c++ projects\\scaraproject\\path_finding.ixx",
+                    "source-path": "c:\\users\\michael.lambertz\\documents\\github\\scaraproject\\path_finding.ixx",
                     "is-interface": true
                 }
             ],

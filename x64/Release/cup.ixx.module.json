@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "x64\\Release\\Cup.ixx.obj",
+            "outputs": [
+                "C:\\Users\\Michael.Lambertz\\Documents\\GitHub\\ScaraProject\\x64\\Release\\vc143.pdb",
+                "x64\\Release\\",
+                "C:\\Users\\Michael.Lambertz\\Documents\\GitHub\\ScaraProject\\x64\\Release\\Cup.ixx.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "Cup",
+                    "source-path": "c:\\users\\michael.lambertz\\documents\\github\\scaraproject\\cup.ixx",
+                    "is-interface": true
+                }
+            ],
+            "requires": []
+        }
+    ]
+}
