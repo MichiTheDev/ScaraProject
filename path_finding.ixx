@@ -104,13 +104,11 @@ public:
 
 void get_level_tiles(std::unordered_map<int2, tile, int2Hasher, int2Equal>& tiles, int2& scara, int2& ankh)
 {
-    std::vector<tile> specific_tiles;
-
     int tile_mask = 0;
-    for (int x = 0; !is_tile(tile_mask, RIGHT_LEVEL_BORDER); ++x)
+    for (int x = 1; !is_tile(tile_mask, RIGHT_LEVEL_BORDER); ++x)
     {
         tile_mask = 0;
-        for (int y = 0; !is_tile(tile_mask, BOTTOM_LEVEL_BORDER); ++y)
+        for (int y = 1; !is_tile(tile_mask, BOTTOM_LEVEL_BORDER); ++y)
         {
             tile_mask = scan_tile_at(x, y);
             int2 tile_position = int2(x, y);
@@ -139,22 +137,22 @@ std::vector<tile*> get_neighbours(const tile& current_tile, std::unordered_map<i
 {
     std::vector<tile*> neighbours;
 
-    int2 current_position = current_tile.get_position();
+    const int2 current_position = current_tile.get_position();
 
     // NORTH NEIGHBOUR
-    int2 north_position = current_position + int2::up();
+    const int2 north_position = current_position + int2::up();
     if (tiles.contains(north_position)) { neighbours.push_back(&tiles[north_position]); }
     
     // EAST NEIGHBOUR
-    int2 east_position = current_position + int2::right();
+    const int2 east_position = current_position + int2::right();
     if (tiles.contains(east_position)) { neighbours.push_back(&tiles[east_position]); }
 
     // SOUTH NEIGHBOUR
-    int2 south_position = current_position + int2::down();
+    const int2 south_position = current_position + int2::down();
     if (tiles.contains(south_position)) { neighbours.push_back(&tiles[south_position]); }
 
     // WEST NEIGHBOUR
-    int2 west_position = current_position + int2::left();
+    const int2 west_position = current_position + int2::left();
     if (tiles.contains(west_position)) { neighbours.push_back(&tiles[west_position]); }
 
     return neighbours;
@@ -172,7 +170,7 @@ int get_distance(const int2& a, const int2& b)
 
 int2 get_scaras_direction(const tile& scara)
 {
-    int direction_mask = scara.get_mask() >> 13 & 0b11;
+    int direction_mask = scara.get_mask() >> DIRECTION & 0b11;
 
     switch (direction_mask)
     {
@@ -185,7 +183,7 @@ int2 get_scaras_direction(const tile& scara)
     return int2{};
 }
 
-std::vector<tile> get_shortest_path(tile& start, tile& end, std::unordered_map<int2, tile, int2Hasher, int2Equal>& tiles)
+std::vector<tile> get_shortest_path(const tile& start, tile& end, std::unordered_map<int2, tile, int2Hasher, int2Equal>& tiles)
 {
     std::vector open_vector { start };
     std::unordered_set<tile, tile::hash> closed_set;
@@ -246,13 +244,13 @@ std::vector<tile> get_shortest_path(tile& start, tile& end, std::unordered_map<i
 
 int2 get_direction_from_to(tile& a, tile& b)
 {
-    int2 direction = int2(b.get_position() - a.get_position());
+    const int2 direction = int2(b.get_position() - a.get_position());
     return direction / int2::mag(direction);
 }
 
 void turn_towards_tile(int2& direction, const int2& path_direction)
 {
-    while(!int2::equal(direction, path_direction))
+    while(!int2::equal(direction, path_direction)) 
     {
         if(int2::equal(direction, int2::up())) { direction = int2::left(); }
         else if(int2::equal(direction, int2::left())) { direction = int2::down(); }
