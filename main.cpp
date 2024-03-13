@@ -12,88 +12,215 @@ int main()
     std::mt19937 rng(dev());
     std::uniform_int_distribution<std::mt19937::result_type> dist(0,2000000000);
     
-    start("LueckenSchliessen", 123213);
+    start("Seitenwechsel", dist(rng));
     
-    set_speed(5);
+    set_speed(20);
     show_rotation(false);
-
-    bool end_reached = false;
     
-    Scara::gehe();
-
-    while (true)
+    std::vector<int> bottom_glyph_positions;
+    std::vector<int> top_glyph_positions;
+    
+    Scara::dreheLinks();
+    Scara::dreheLinks();
+    Scara::dreheLinks();
+    while(!Scara::istVorneAbgrund())
     {
-        while (!Scara::istVorneAbgrund())
+        Scara::gehe();
+    }
+    
+    Scara::dreheLinks();
+    
+    int x = 0;
+    while(!Scara::istVorneAbgrund())
+    {
+        Scara::gehe();
+        ++x;
+    
+        Scara::dreheLinks();
+    
+        if(!Scara::istVorneAbgrund())
+        {
+            bottom_glyph_positions.push_back(x);
+        }
+    
+        Scara::dreheLinks();
+        Scara::dreheLinks();
+        Scara::dreheLinks();
+    }
+    
+    Scara::dreheLinks();
+    
+    while (!Scara::istVorneAbgrund())
+    {
+        Scara::gehe();
+    }
+    
+    Scara::dreheLinks();
+    
+    x = 0;
+    while(!Scara::istVorneAbgrund())
+    {
+        Scara::gehe();
+        ++x;
+    
+        Scara::dreheLinks();
+    
+        if(!Scara::istVorneAbgrund())
+        {
+            top_glyph_positions.push_back(x);
+        }
+    
+        Scara::dreheLinks();
+        Scara::dreheLinks();
+        Scara::dreheLinks();
+    }
+
+    if(bottom_glyph_positions.size() != 0 || top_glyph_positions.size() != 0)
+    {
+        Scara::dreheLinks();
+    
+        while(!Scara::istVorneAbgrund())
         {
             Scara::gehe();
-        }
-    
-        while(Scara::istVorneAbgrund())
-        {
-            Scara::schiebeStein();
-        }
-
-        Scara::gehe();
-
-        if(!Scara::istSteinVerschiebbar())
-        {
-            end_reached = true;
         }
         
-        if(end_reached)
+        Scara::dreheLinks();
+        
+        x = 0;
+        int bottom_row = 0;
+        while(true)
         {
-            Scara::dreheLinks();
-            Scara::dreheLinks();
             Scara::gehe();
-            while(Scara::istVorneAbgrund())
+            ++x;
+        
+            if(bottom_glyph_positions[bottom_row] == x)
             {
-                if(!Scara::istSteinVerschiebbar()) break;
-                Scara::schiebeStein();
-            }
-        }
-        else
-        {
-            bool first_loop = true;
-            do
-            {
-                if(!first_loop)
+                ++bottom_row;
+        
+                Scara::dreheLinks();
+        
+                Scara::gehe();
+        
+                while(true)
+                {
+                    if(Scara::istSteinVerschiebbar() && Scara::istVorneAbgrund())
+                    {
+                        Scara::schiebeStein();
+                    }
+                    else
+                    {
+                        Scara::gehe();
+                        break;
+                    }
+                }
+        
+                Scara::dreheLinks();
+        
+                while(!Scara::istVorneAbgrund())
                 {
                     Scara::gehe();
                 }
-                
+        
                 Scara::dreheLinks();
-                Scara::schiebeStein();
-    
-                Scara::dreheLinks();
-                Scara::schiebeStein();
-                Scara::schiebeStein();
-    
-                Scara::dreheLinks();
-                Scara::schiebeStein();
-                Scara::dreheLinks();
-
-                Scara::dreheLinks();
-                Scara::dreheLinks();
-
-                if(Scara::istVorneAbgrund())
+        
+                while(!Scara::istVorneAbgrund())
                 {
-                    Scara::dreheLinks();
-                    Scara::dreheLinks();
+                    Scara::gehe();
                 }
-                first_loop = false;
-            } while(!Scara::istVorneAbgrund());
+        
+                Scara::dreheLinks();
+                
+                if(bottom_row >= bottom_glyph_positions.size() - 1)
+                {
+                    break;
+                }
+        
+                x = 0;
+            }
         }
         
-        if(end_reached)
+        while(!Scara::istVorneAbgrund())
         {
-            break;
+            Scara::gehe();
         }
         
         Scara::dreheLinks();
+        
+        while(!Scara::istVorneAbgrund())
+        {
+            Scara::gehe();
+        }
+        
         Scara::dreheLinks();
-        Scara::gehe();
+        
+        int top_row = 0;
+        x = 0;
+        while(true)
+        {
+            Scara::gehe();
+            ++x;
+        
+            if(top_glyph_positions[top_row] == x)
+            {
+                ++top_row;
+        
+                Scara::dreheLinks();
+        
+                Scara::gehe();
+        
+                while(true)
+                {
+                    if(Scara::istSteinVerschiebbar() && Scara::istVorneAbgrund())
+                    {
+                        Scara::schiebeStein();
+                    }
+                    else
+                    {
+                        Scara::gehe();
+                        break;
+                    }
+                }
+        
+                Scara::dreheLinks();
+        
+                while(!Scara::istVorneAbgrund())
+                {
+                    Scara::gehe();
+                }
+        
+                Scara::dreheLinks();
+        
+                while(!Scara::istVorneAbgrund())
+                {
+                    Scara::gehe();
+                }
+        
+                Scara::dreheLinks();
+        
+                if(top_row >= top_glyph_positions.size() - 1)
+                {
+                    break;
+                }
+        
+                x = 0;
+            }
+        }
+    }
+    
+    while(true)
+    {
+        if(Scara::stehtAufAnkh()) break;
+    
+        if(!Scara::istVorneAbgrund())
+        {
+            Scara::gehe();
+        }
+        else
+        {
+            Scara::dreheLinks();
+            Scara::gehe();
+        }
     }
     
     end();
 }
-
